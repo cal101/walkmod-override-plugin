@@ -93,8 +93,8 @@
 		</profile>
 	</profiles>
 	<scm>
-		<url>https://github.com/rpau/walkmod-refactor-plugin.git</url>
-		<connection>https://github.com/rpau/walkmod-refactor-plugin.git</connection>
+		<url>https://github.com/rpau/walkmod-override-plugin.git</url>
+		<connection>https://github.com/rpau/walkmod-override-plugin.git</connection>
 	</scm>
 	<developers>
 		<developer>
@@ -102,11 +102,6 @@
 			<name>rpau</name>
 			<email>raquelpau@gmail.com</email>
 		</developer>
-		<developer>
-			<id>acoroleu</id>
-			<name>acoroleu</name>
-			<email>acoroleu@gmail.com</email>
-		</developer>
 	</developers>
-	<description>Visitors for refactoring (migration) purposes (i.e upgrade a third-party API).</description>
+	<description>Visitor to apply the override Java annotations on methods whenever it is necessary.</description>
 </project>
