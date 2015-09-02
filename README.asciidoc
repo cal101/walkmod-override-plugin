@@ -1,0 +1,75 @@
+walkmod-override-plugin
+=======================
+Raquel Pau <raquelpau@gmail.com>
+
+This is a walkmod plugin to add the override annotation in Java methods whenever it is necessary 
+(when a given class implements an interface or defines a method that belongs to its superclass). 
+
+== Example
+Let's see an example. From this code, which is a class with its typical `toString` implementation. 
+
+```java
+package example;
+
+public class Foo{
+ 
+  public String toString(){
+    ...
+  }
+}
+```
+
+It is transformed to :
+```java
+package example;
+
+public class Foo{
+
+  @Override
+  public String toString(){
+    ...
+  }
+}
+```
+
+== Usage
+
+. Add the https://github.com/rpau/walkmod-maven-plugin[walkmod-maven-plugin] into your `walkmod.xml` as a plugin. 
+This plugin will interpret your classpath accoding your `pom.xml` and will compile your code.
+
+. Add https://github.com/rpau/walkmod-override-plugin[walkmod-override-plugin] into your `walkmod.xml` as a plugin.
+
+. Add the transformations `walkmod:commons:override-corrector` into your  `walkmod.xml`.
+
+```XML
+<!DOCTYPE walkmod PUBLIC "-//WALKMOD//DTD"  "http://www.walkmod.com/dtd/walkmod-1.0.dtd" >
+<walkmod>
+  <plugins>
+    <plugin groupId="org.walkmod" artifactId="walkmod-maven-plugin" version="[1.1.1,)" />
+    <plugin groupId="org.walkmod" artifactId="walkmod-override-plugin" version="[1.0.0, 2.0)" />
+  </plugins>
+  <conf-providers>
+    <conf-provider type="walkmod:commons:maven"></conf-provider>
+  </conf-providers>
+  <chain name="main-chain">	
+    <transformation type="walkmod:commons:override-corrector"/>
+  </chain>	
+</walkmod>
+```
+
+You can apply walkmod-override-plugin via walkmod. 
+
+  $ walkmod apply
+
+Or, you can also check which would be the modified classes typing:
+
+  $ walkmod check
+
+
+== Contributing
+
+If you want to hack on this, fork it, improve it and send me a pull request.
+
+To get started using it, just clone it and call mvn install. 
+
+

@@ -3,9 +3,9 @@
    "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-	<bean id="org.walkmod:walkmod-override-plugin:override-annotations-corrector"
+	<bean id="org.walkmod:walkmod-override-plugin:override-corrector"
 		class="org.walkmod.override.visitors.OverrideVisitor"></bean>
 
 	<alias name="org.walkmod:walkmod-override-plugin:override-annotations-corrector"
-		alias="walkmod:commons:override-annotations-corrector" />
+		alias="walkmod:commons:override-corrector" />
 </beans>
