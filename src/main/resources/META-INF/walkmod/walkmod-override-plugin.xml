@@ -8,4 +8,7 @@
 
 	<alias name="org.walkmod:walkmod-override-plugin:override-annotations-corrector"
 		alias="walkmod:commons:override-corrector" />
+		
+	<alias name="org.walkmod:walkmod-override-plugin:override-annotations-corrector"
+		alias="org.walkmod:walkmod-override-plugin:override" />
 </beans>
