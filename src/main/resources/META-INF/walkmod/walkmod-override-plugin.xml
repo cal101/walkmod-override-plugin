@@ -6,9 +6,9 @@
 	<bean id="org.walkmod:walkmod-override-plugin:override-corrector"
 		class="org.walkmod.override.visitors.OverrideVisitor"></bean>
 
-	<alias name="org.walkmod:walkmod-override-plugin:override-annotations-corrector"
+	<alias name="org.walkmod:walkmod-override-plugin:override-corrector"
 		alias="walkmod:commons:override-corrector" />
 		
-	<alias name="org.walkmod:walkmod-override-plugin:override-annotations-corrector"
+	<alias name="org.walkmod:walkmod-override-plugin:override-corrector"
 		alias="org.walkmod:walkmod-override-plugin:override" />
 </beans>
