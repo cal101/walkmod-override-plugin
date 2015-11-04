@@ -41,8 +41,23 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
 		if (sdata != null) {
 
 			Method method = sdata.getMethod();
+			List<AnnotationExpr> mAnnotations = md.getAnnotations();
+			boolean containsOverride = false;
+			if (mAnnotations != null) {
+				// To avoid a JDK8 bug
+				// (http://stackoverflow.com/questions/26515016/annotations-on-an-overridden-method-are-ignored-in-java-8-propertydescriptor)
+				Iterator<AnnotationExpr> it = mAnnotations.iterator();
+				while (it.hasNext() && !containsOverride) {
+					AnnotationExpr ae = it.next();
+					SymbolData sd = ae.getSymbolData();
+					if (sd != null) {
+						Class<?> clazz = sd.getClazz();
+						containsOverride = clazz.equals(Override.class);
+					}
+				}
+			}
 
-			if (!method.isAnnotationPresent(Override.class)) {
+			if (!containsOverride && !method.isAnnotationPresent(Override.class)) {
 
 				Class<?> declaringClass = method.getDeclaringClass();
 				Class<?> parentClass = declaringClass.getSuperclass();
@@ -73,8 +88,7 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
 					Iterator<Class<?>> it = scopesToCheck.iterator();
 					boolean found = false;
 					while (it.hasNext() && !found) {
-						found = (MethodInspector.findMethod(it.next(), args,
-								md.getName()) != null);
+						found = (MethodInspector.findMethod(it.next(), args, md.getName()) != null);
 					}
 					if (found) {
 						List<AnnotationExpr> annotations = md.getAnnotations();
@@ -83,8 +97,7 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
 							md.setAnnotations(annotations);
 						}
 
-						annotations.add(new MarkerAnnotationExpr(new NameExpr(
-								"Override")));
+						annotations.add(new MarkerAnnotationExpr(new NameExpr("Override")));
 					}
 				}
 			}
