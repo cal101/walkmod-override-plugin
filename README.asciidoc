@@ -34,28 +34,19 @@ public class Foo{
 
 == Usage
 
-Add the transformation `override` and your project build tool name (maven or gradle) as a configuration provider into your `walkmod.xml` .
 
-```XML
-<!DOCTYPE walkmod PUBLIC "-//WALKMOD//DTD"  "http://www.walkmod.com/dtd/walkmod-1.1.dtd" >
-<walkmod>
-  <conf-providers>
-    <conf-provider type="maven"></conf-provider>
-  </conf-providers>
-  <chain name="main-chain">	
-    <transformation type="override"/>
-  </chain>	
-</walkmod>
-```
+=== Only Walkmod >= 2.2.0
 
-You can apply walkmod-override-plugin via walkmod. 
+Just type:
 
-  $ walkmod apply
+----
+walkmod add override
+----
+and then, to see the results:
 
-Or, you can also check which would be the modified classes typing:
-
-  $ walkmod check
-
+----
+walkmod apply
+----
 
 == Contributing
 
