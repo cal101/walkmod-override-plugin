@@ -35,74 +35,85 @@ import org.walkmod.walkers.VisitorContext;
 @RequiresSemanticAnalysis
 public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
 
-	@Override
-	public void visit(MethodDeclaration md, VisitorContext arg) {
-		MethodSymbolData sdata = md.getSymbolData();
-		if (sdata != null) {
+   @Override
+   public void visit(MethodDeclaration md, VisitorContext arg) {
+      MethodSymbolData sdata = md.getSymbolData();
+      if (sdata != null) {
 
-			Method method = sdata.getMethod();
-			List<AnnotationExpr> mAnnotations = md.getAnnotations();
-			boolean containsOverride = false;
-			if (mAnnotations != null) {
-				// To avoid a JDK8 bug
-				// (http://stackoverflow.com/questions/26515016/annotations-on-an-overridden-method-are-ignored-in-java-8-propertydescriptor)
-				Iterator<AnnotationExpr> it = mAnnotations.iterator();
-				while (it.hasNext() && !containsOverride) {
-					AnnotationExpr ae = it.next();
-					SymbolData sd = ae.getSymbolData();
-					if (sd != null) {
-						Class<?> clazz = sd.getClazz();
-						containsOverride = clazz.equals(Override.class);
-					}
-				}
-			}
+         Method method = sdata.getMethod();
+         List<AnnotationExpr> mAnnotations = md.getAnnotations();
+         boolean containsOverride = false;
+         if (mAnnotations != null) {
+            // To avoid a JDK8 bug
+            // (http://stackoverflow.com/questions/26515016/annotations-on-an-overridden-method-are-ignored-in-java-8-propertydescriptor)
+            Iterator<AnnotationExpr> it = mAnnotations.iterator();
+            while (it.hasNext() && !containsOverride) {
+               AnnotationExpr ae = it.next();
+               SymbolData sd = ae.getSymbolData();
+               if (sd != null) {
+                  Class<?> clazz = sd.getClazz();
+                  containsOverride = clazz.equals(Override.class);
+               }
+            }
+         }
 
-			if (!containsOverride && !method.isAnnotationPresent(Override.class)) {
+         if (!containsOverride) {
 
-				Class<?> declaringClass = method.getDeclaringClass();
-				Class<?> parentClass = declaringClass.getSuperclass();
+            boolean isAnnotationPresent = true;
 
-				if (parentClass != null) {
+            try {
+               isAnnotationPresent = method.isAnnotationPresent(Override.class);
+            } catch (Throwable t) {
+               //maybe there are private classes that cannot be accessed by reflection
+               //http://stackoverflow.com/questions/8512207/jetty-guice-illegalaccesserror
+            }
+            if (!isAnnotationPresent) {
 
-					// it should be initialized after resolving the method
+               Class<?> declaringClass = method.getDeclaringClass();
+               Class<?> parentClass = declaringClass.getSuperclass();
 
-					List<Parameter> params = md.getParameters();
-					SymbolData[] args = null;
-					if (params != null) {
-						args = new SymbolData[params.size()];
-						int i = 0;
-						for (Parameter param : params) {
-							args[i] = param.getType().getSymbolData();
-							i++;
-						}
-					} else {
-						args = new SymbolData[0];
-					}
+               if (parentClass != null) {
 
-					List<Class<?>> scopesToCheck = new LinkedList<Class<?>>();
-					scopesToCheck.add(parentClass);
-					Class<?>[] interfaces = declaringClass.getInterfaces();
-					for (int i = 0; i < interfaces.length; i++) {
-						scopesToCheck.add(interfaces[i]);
-					}
-					Iterator<Class<?>> it = scopesToCheck.iterator();
-					boolean found = false;
-					while (it.hasNext() && !found) {
-						found = (MethodInspector.findMethod(it.next(), args, md.getName()) != null);
-					}
-					if (found) {
-						List<AnnotationExpr> annotations = md.getAnnotations();
-						if (annotations == null) {
-							annotations = new LinkedList<AnnotationExpr>();
-							md.setAnnotations(annotations);
-						}
+                  // it should be initialized after resolving the method
 
-						annotations.add(new MarkerAnnotationExpr(new NameExpr("Override")));
-					}
-				}
-			}
-		}
+                  List<Parameter> params = md.getParameters();
+                  SymbolData[] args = null;
+                  if (params != null) {
+                     args = new SymbolData[params.size()];
+                     int i = 0;
+                     for (Parameter param : params) {
+                        args[i] = param.getType().getSymbolData();
+                        i++;
+                     }
+                  } else {
+                     args = new SymbolData[0];
+                  }
 
-		super.visit(md, arg);
-	}
+                  List<Class<?>> scopesToCheck = new LinkedList<Class<?>>();
+                  scopesToCheck.add(parentClass);
+                  Class<?>[] interfaces = declaringClass.getInterfaces();
+                  for (int i = 0; i < interfaces.length; i++) {
+                     scopesToCheck.add(interfaces[i]);
+                  }
+                  Iterator<Class<?>> it = scopesToCheck.iterator();
+                  boolean found = false;
+                  while (it.hasNext() && !found) {
+                     found = (MethodInspector.findMethod(it.next(), args, md.getName()) != null);
+                  }
+                  if (found) {
+                     List<AnnotationExpr> annotations = md.getAnnotations();
+                     if (annotations == null) {
+                        annotations = new LinkedList<AnnotationExpr>();
+                        md.setAnnotations(annotations);
+                     }
+
+                     annotations.add(new MarkerAnnotationExpr(new NameExpr("Override")));
+                  }
+               }
+            }
+         }
+      }
+
+      super.visit(md, arg);
+   }
 }
