@@ -242,5 +242,17 @@ public class OperationVisitorTest extends SemanticTest {
 
 		Assert.assertEquals("Override", ann.getName().getName());
 	}
+	
+	@Test
+	public void testCorrectOverrideWithSubtypes() throws Exception{
+	   CompilationUnit cu = compile("public class Foo { public boolean equals(Foo foo){ return false;} }");
+	   OverrideVisitor visitor = new OverrideVisitor();
+      cu.accept(visitor, null);
+
+      MethodDeclaration firstMethod = (MethodDeclaration) cu.getTypes()
+            .get(0).getMembers().get(0);
+      List<AnnotationExpr> annotations = firstMethod.getAnnotations();
+      Assert.assertNull(annotations);
+	}
 
 }

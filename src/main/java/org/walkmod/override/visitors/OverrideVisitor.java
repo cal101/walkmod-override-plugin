@@ -16,6 +16,7 @@
 package org.walkmod.override.visitors;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,11 +97,23 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
                      scopesToCheck.add(interfaces[i]);
                   }
                   Iterator<Class<?>> it = scopesToCheck.iterator();
-                  boolean found = false;
-                  while (it.hasNext() && !found) {
-                     found = (MethodInspector.findMethod(it.next(), args, md.getName()) != null);
+                  Method foundMethod = null;
+                  while (it.hasNext() && foundMethod == null) {
+                     foundMethod = MethodInspector.findMethod(it.next(), args, md.getName());
+                     if (foundMethod != null) {
+                        Type[] parameterTypes = foundMethod.getGenericParameterTypes();
+                        boolean valid = true;
+                        for (int i = 0; i < parameterTypes.length && valid; i++) {
+                           if(parameterTypes[i] instanceof Class){
+                              valid = (args[i].getClazz().getName().equals(((Class)parameterTypes[i]).getName()));
+                           }
+                        }
+                        if (!valid) {
+                           foundMethod = null;
+                        }
+                     }
                   }
-                  if (found) {
+                  if (foundMethod != null) {
                      List<AnnotationExpr> annotations = md.getAnnotations();
                      if (annotations == null) {
                         annotations = new LinkedList<AnnotationExpr>();
