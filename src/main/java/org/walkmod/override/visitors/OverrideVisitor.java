@@ -104,7 +104,8 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
                         foundMethod = MethodInspector.findMethod(it.next(), args, md.getName());
                         if (foundMethod != null) {
                            Type[] parameterTypes = foundMethod.getGenericParameterTypes();
-                           boolean valid = true;
+                           int modifiers = foundMethod.getModifiers();
+                           boolean valid = ModifierSet.isPublic(modifiers) || ModifierSet.isProtected(modifiers);
                            for (int i = 0; i < parameterTypes.length && valid; i++) {
                               if (parameterTypes[i] instanceof Class) {
                                  valid = (args[i].getClazz().getName().equals(((Class) parameterTypes[i]).getName()));

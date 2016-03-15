@@ -265,5 +265,17 @@ public class OperationVisitorTest extends SemanticTest {
       List<AnnotationExpr> annotations = firstMethod.getAnnotations();
       Assert.assertNull(annotations);
 	}
+	
+	@Test
+	public void testIssue3() throws Exception{
+	   CompilationUnit cu = compile("import java.util.Hashtable; final class ThreadLocalMap extends ThreadLocal { public final Object childValue(Object parentValue) { return null; }}");
+	   OverrideVisitor visitor = new OverrideVisitor();
+      cu.accept(visitor, null);
+      MethodDeclaration firstMethod = (MethodDeclaration) cu.getTypes()
+            .get(0).getMembers().get(0);
+      List<AnnotationExpr> annotations = firstMethod.getAnnotations();
+      Assert.assertNull(annotations);
+	}
+	
 
 }
