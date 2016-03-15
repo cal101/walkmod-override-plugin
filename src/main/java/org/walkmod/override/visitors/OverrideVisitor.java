@@ -39,7 +39,7 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
 
    @Override
    public void visit(MethodDeclaration md, VisitorContext arg) {
-      if (!ModifierSet.isStatic(md.getModifiers())) {
+      if (!ModifierSet.isStatic(md.getModifiers()) && !ModifierSet.isPrivate(md.getModifiers())) {
          MethodSymbolData sdata = md.getSymbolData();
          if (sdata != null) {
 
