@@ -277,5 +277,18 @@ public class OperationVisitorTest extends SemanticTest {
       Assert.assertNull(annotations);
 	}
 	
+	
+	@Test
+	public void testIssue3Generics() throws Exception{
+	   CompilationUnit cu = compile("public class C extends Comparator{ public void compare(java.util.List x){}}", "public class Comparator<T>{ public void compare(T x){} }");
+	   OverrideVisitor visitor = new OverrideVisitor();
+      cu.accept(visitor, null);
+      MethodDeclaration firstMethod = (MethodDeclaration) cu.getTypes()
+            .get(0).getMembers().get(0);
+      List<AnnotationExpr> annotations = firstMethod.getAnnotations();
+      Assert.assertNull(annotations);
+	} 
+	
+	
 
 }
