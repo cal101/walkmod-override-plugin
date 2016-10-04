@@ -24,6 +24,10 @@ import org.walkmod.javalang.ast.body.BodyDeclaration;
 import org.walkmod.javalang.ast.body.ClassOrInterfaceDeclaration;
 import org.walkmod.javalang.ast.body.MethodDeclaration;
 import org.walkmod.javalang.ast.expr.AnnotationExpr;
+import org.walkmod.javalang.ast.expr.Expression;
+import org.walkmod.javalang.ast.expr.ObjectCreationExpr;
+import org.walkmod.javalang.ast.expr.VariableDeclarationExpr;
+import org.walkmod.javalang.ast.stmt.ExpressionStmt;
 import org.walkmod.javalang.ast.stmt.TypeDeclarationStmt;
 import org.walkmod.javalang.test.SemanticTest;
 import org.walkmod.override.visitors.OverrideVisitor;
@@ -289,6 +293,17 @@ public class OperationVisitorTest extends SemanticTest {
       Assert.assertNull(annotations);
 	} 
 	
+	@Test
+	public void testAnonymousClass() throws Exception{
+	   
+	   CompilationUnit cu = compile("public class Foo { public void bye() {} abstract static class Scanner{ void hello(){} } static final class DefaultScanner extends Scanner { void bye() {} } }");
+	   OverrideVisitor visitor = new OverrideVisitor();
+      cu.accept(visitor, null);
+      ClassOrInterfaceDeclaration firstMethod = (ClassOrInterfaceDeclaration) cu.getTypes()
+            .get(0).getMembers().get(2);
+      MethodDeclaration md = (MethodDeclaration) firstMethod.getMembers().get(0);
+      Assert.assertNull(md.getAnnotations());
+	}
 	
 
 }

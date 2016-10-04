@@ -114,46 +114,50 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
 
                   foundMethod = MethodInspector.findMethod(clazzToAnalyze, args, md.getName());
                   if (foundMethod != null) {
-
-                     List<Type> types = ClassInspector.getInterfaceOrSuperclassImplementations(declaringClass,
-                           clazzToAnalyze);
-                     Class<?> implementation = null;
-                     if (types != null && !types.isEmpty()) {
-                        if (types.get(0) instanceof Class) {
-                           implementation = (Class<?>) types.get(0);
+                     if (!foundMethod.getDeclaringClass().isAssignableFrom(clazzToAnalyze)) {
+                        foundMethod = null;
+                     } else {
+                        List<Type> types = ClassInspector.getInterfaceOrSuperclassImplementations(declaringClass,
+                              clazzToAnalyze);
+                        Class<?> implementation = null;
+                        if (types != null && !types.isEmpty()) {
+                           if (types.get(0) instanceof Class) {
+                              implementation = (Class<?>) types.get(0);
+                           }
                         }
-                     }
 
-                     Type[] parameterTypes = foundMethod.getGenericParameterTypes();
-                     int modifiers = foundMethod.getModifiers();
-                     boolean valid = ModifierSet.isPublic(modifiers) || ModifierSet.isProtected(modifiers);
-                     for (int i = 0; i < parameterTypes.length && valid; i++) {
-                        if (parameterTypes[i] instanceof Class) {
-                           valid = (args[i].getClazz().getName().equals(((Class<?>) parameterTypes[i]).getName()));
-                        } else if (parameterTypes[i] instanceof TypeVariable) {
+                        Type[] parameterTypes = foundMethod.getGenericParameterTypes();
+                        int modifiers = foundMethod.getModifiers();
+                        boolean valid = ModifierSet.isPublic(modifiers) || ModifierSet.isProtected(modifiers);
+                        for (int i = 0; i < parameterTypes.length && valid; i++) {
+                           if (parameterTypes[i] instanceof Class) {
+                              valid = (args[i].getClazz().getName().equals(((Class<?>) parameterTypes[i]).getName()));
+                           } else if (parameterTypes[i] instanceof TypeVariable) {
 
-                           TypeVariable<?> tv = (TypeVariable<?>) parameterTypes[i];
-                           if (implementation != null) {
-                              TypeVariable<?>[] tvs = implementation.getTypeParameters();
-                              int pos = -1;
-                              for (int k = 0; k < tvs.length && pos == -1; k++) {
-                                 if (tvs[k].getName().equals(tv.getName())) {
-                                    pos = k;
+                              TypeVariable<?> tv = (TypeVariable<?>) parameterTypes[i];
+                              if (implementation != null) {
+                                 TypeVariable<?>[] tvs = implementation.getTypeParameters();
+                                 int pos = -1;
+                                 for (int k = 0; k < tvs.length && pos == -1; k++) {
+                                    if (tvs[k].getName().equals(tv.getName())) {
+                                       pos = k;
+                                    }
                                  }
-                              }
-                              if (pos > -1) {
-                                 Type[] bounds = tvs[pos].getBounds();
-                                 for (int k = 0; k < bounds.length && valid; k++) {
-                                    if (bounds[k] instanceof Class<?>) {
-                                       valid = args[i].getClazz().isAssignableFrom((Class) bounds[k]);
+                                 if (pos > -1) {
+                                    Type[] bounds = tvs[pos].getBounds();
+                                    for (int k = 0; k < bounds.length && valid; k++) {
+                                       if (bounds[k] instanceof Class<?>) {
+                                          valid = args[i].getClazz().isAssignableFrom((Class) bounds[k]);
+                                       }
                                     }
                                  }
                               }
                            }
                         }
-                     }
-                     if (!valid) {
-                        foundMethod = null;
+
+                        if (!valid) {
+                           foundMethod = null;
+                        }
                      }
                   }
                }
