@@ -53,6 +53,9 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
                Class<?> clazz = sd.getClazz();
                containsOverride = clazz.equals(Override.class);
             }
+            else{
+               containsOverride = "Override".equals(ae.getName().getName());
+            }
          }
       }
       return containsOverride;
