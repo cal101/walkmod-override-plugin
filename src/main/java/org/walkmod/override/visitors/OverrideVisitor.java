@@ -16,8 +16,6 @@
 package org.walkmod.override.visitors;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,12 +24,10 @@ import org.walkmod.javalang.ast.MethodSymbolData;
 import org.walkmod.javalang.ast.SymbolData;
 import org.walkmod.javalang.ast.body.MethodDeclaration;
 import org.walkmod.javalang.ast.body.ModifierSet;
-import org.walkmod.javalang.ast.body.Parameter;
 import org.walkmod.javalang.ast.expr.AnnotationExpr;
 import org.walkmod.javalang.ast.expr.MarkerAnnotationExpr;
 import org.walkmod.javalang.ast.expr.NameExpr;
-import org.walkmod.javalang.compiler.reflection.ClassInspector;
-import org.walkmod.javalang.compiler.reflection.MethodInspector;
+import org.walkmod.javalang.compiler.analyze.OverrideAnalyzer;
 import org.walkmod.javalang.compiler.symbols.RequiresSemanticAnalysis;
 import org.walkmod.javalang.visitors.VoidVisitorAdapter;
 import org.walkmod.walkers.VisitorContext;
@@ -78,94 +74,8 @@ public class OverrideVisitor extends VoidVisitorAdapter<VisitorContext> {
       MethodSymbolData sdata = md.getSymbolData();
       boolean result = false;
       if (sdata != null) {
-
-         Method method = sdata.getMethod();
-
          if (!containsOverrideAsAnnotationExpr(md) && !containsOverrideInByteCode(md)) {
-
-            Class<?> declaringClass = method.getDeclaringClass();
-
-            Class<?> parentClass = declaringClass.getSuperclass();
-
-            if (parentClass != null) {
-
-               // it should be initialized after resolving the method
-               List<Parameter> params = md.getParameters();
-               SymbolData[] args = null;
-               if (params != null) {
-                  args = new SymbolData[params.size()];
-                  int i = 0;
-                  for (Parameter param : params) {
-                     args[i] = param.getType().getSymbolData();
-                     i++;
-                  }
-               } else {
-                  args = new SymbolData[0];
-               }
-
-               List<Class<?>> scopesToCheck = new LinkedList<Class<?>>();
-               scopesToCheck.add(parentClass);
-               Class<?>[] interfaces = declaringClass.getInterfaces();
-               for (int i = 0; i < interfaces.length; i++) {
-                  scopesToCheck.add(interfaces[i]);
-               }
-               Iterator<Class<?>> it = scopesToCheck.iterator();
-               Method foundMethod = null;
-               while (it.hasNext() && foundMethod == null) {
-
-                  Class<?> clazzToAnalyze = it.next();
-
-                  foundMethod = MethodInspector.findMethod(clazzToAnalyze, args, md.getName());
-                  if (foundMethod != null) {
-                     if (!foundMethod.getDeclaringClass().isAssignableFrom(clazzToAnalyze)) {
-                        foundMethod = null;
-                     } else {
-                        List<Type> types = ClassInspector.getInterfaceOrSuperclassImplementations(declaringClass,
-                              clazzToAnalyze);
-                        Class<?> implementation = null;
-                        if (types != null && !types.isEmpty()) {
-                           if (types.get(0) instanceof Class) {
-                              implementation = (Class<?>) types.get(0);
-                           }
-                        }
-
-                        Type[] parameterTypes = foundMethod.getGenericParameterTypes();
-                        int modifiers = foundMethod.getModifiers();
-                        boolean valid = ModifierSet.isPublic(modifiers) || ModifierSet.isProtected(modifiers);
-                        for (int i = 0; i < parameterTypes.length && valid; i++) {
-                           if (parameterTypes[i] instanceof Class) {
-                              valid = (args[i].getClazz().getName().equals(((Class<?>) parameterTypes[i]).getName()));
-                           } else if (parameterTypes[i] instanceof TypeVariable) {
-
-                              TypeVariable<?> tv = (TypeVariable<?>) parameterTypes[i];
-                              if (implementation != null) {
-                                 TypeVariable<?>[] tvs = implementation.getTypeParameters();
-                                 int pos = -1;
-                                 for (int k = 0; k < tvs.length && pos == -1; k++) {
-                                    if (tvs[k].getName().equals(tv.getName())) {
-                                       pos = k;
-                                    }
-                                 }
-                                 if (pos > -1) {
-                                    Type[] bounds = tvs[pos].getBounds();
-                                    for (int k = 0; k < bounds.length && valid; k++) {
-                                       if (bounds[k] instanceof Class<?>) {
-                                          valid = args[i].getClazz().isAssignableFrom((Class) bounds[k]);
-                                       }
-                                    }
-                                 }
-                              }
-                           }
-                        }
-
-                        if (!valid) {
-                           foundMethod = null;
-                        }
-                     }
-                  }
-               }
-               result = foundMethod != null;
-            }
+            result = OverrideAnalyzer.isMethodOverride(md);
          }
       }
       return result;

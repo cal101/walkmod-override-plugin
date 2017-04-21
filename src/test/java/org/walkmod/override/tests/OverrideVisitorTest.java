@@ -32,7 +32,7 @@ import org.walkmod.javalang.ast.stmt.TypeDeclarationStmt;
 import org.walkmod.javalang.test.SemanticTest;
 import org.walkmod.override.visitors.OverrideVisitor;
 
-public class OperationVisitorTest extends SemanticTest {
+public class OverrideVisitorTest extends SemanticTest {
 
 	@Test
 	public void testOverrideOnSimpleClass() throws Exception {
@@ -258,16 +258,17 @@ public class OperationVisitorTest extends SemanticTest {
       List<AnnotationExpr> annotations = firstMethod.getAnnotations();
       Assert.assertNull(annotations);
 	}
-	
+
 	@Test
 	public void testStaticMethods() throws Exception{
-	   CompilationUnit cu = compile("public class Bar extends Foo{ public static void setTestMode(boolean testMode)  {}}","public class Foo { public static void setTestMode(boolean testMode) { }}");
-	   OverrideVisitor visitor = new OverrideVisitor();
-      cu.accept(visitor, null);
-      MethodDeclaration firstMethod = (MethodDeclaration) cu.getTypes()
-            .get(0).getMembers().get(0);
-      List<AnnotationExpr> annotations = firstMethod.getAnnotations();
-      Assert.assertNull(annotations);
+		CompilationUnit cu = compile("public class Bar extends Foo{ public static void setTestMode(boolean testMode)  {}}",
+				"public class Foo { public static void setTestMode(boolean testMode) { }}");
+		OverrideVisitor visitor = new OverrideVisitor();
+		cu.accept(visitor, null);
+		MethodDeclaration firstMethod = (MethodDeclaration) cu.getTypes()
+				.get(0).getMembers().get(0);
+		List<AnnotationExpr> annotations = firstMethod.getAnnotations();
+		Assert.assertNull(annotations);
 	}
 	
 	@Test
